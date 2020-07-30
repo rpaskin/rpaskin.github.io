@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Log de Acesso</title>
+</head>
+
+<body>
+
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript">
+				var name = localStorage.getItem('nomeEmpresaAcesso');
+
+				if (name === undefined || name === null || name === "null"){
+					do {
+						name = prompt("Por favor entre com seu nome e empresa:");
+						if (name !== null){
+							name = name.trim();
+						}
+					}
+					while (name === undefined || name === null)
+				}
+
+				if (name !== undefined && name !== null && name !== "null" && name){
+	        var jqxhr = $.ajax({
+	            url: 'http://catalogo.les.inf.puc-rio.br:65432/ecoaVideoCataloger/registraPresenca/',
+	            type: 'post',
+	            data: {
+	            	nome: encodeURIComponent(name),
+	            	programa: "insurtech"
+	            },
+	            headers: {
+	                'Content-type': 'application/json; charset=utf-8'
+	            }
+	        });
+
+	        jqxhr.done(function(jqxhr, textStatus) {
+	          // console.log(32,'done', textStatus, name);
+						if (name !== undefined && name !== null && name !== "null")
+							localStorage.setItem('nomeEmpresaAcesso', name);
+	        });
+	      }
+	      else {
+	      	window.location.reload();
+	      }
+    </script>
+</body>
+</html>
