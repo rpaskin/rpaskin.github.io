@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Teste API</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 	<h1>Filmes de Star Wars</h1>
@@ -23,32 +24,18 @@
   document.getElementById("get_movies").addEventListener('click', makeRequest);
 
   function makeRequest() {
-    httpRequest = new XMLHttpRequest();
 
-    if (!httpRequest) {
-      alert('ERRO: não foi possível pegar os dados');
-      return false;
-    }
-    httpRequest.onreadystatechange = getFilms;
-    httpRequest.open('GET', 'https://swapi.co/api/films/');
-    httpRequest.send();
-  }
+    $.ajax({url: "https://swapi.dev/api/films/", success: function(result){
 
-  function getFilms() {
-    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-      if (httpRequest.status === 200) {
-        // console.log(httpRequest.responseText);
-        data = JSON.parse(httpRequest.responseText);
-        showFilms(data);
-      } else {
-        alert('Houve um problema com a requisição de dados.');
-      }
-    }
+      console.log(30,result)
+
+      showFilms(result['results']);
+    }});
   }
 
   function showFilms(data){
 		// console.log(data);
-  	data.results.forEach(showFilm);
+  	data.forEach(showFilm);
   }
 
   function showFilm(element, index, array){
