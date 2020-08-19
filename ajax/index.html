@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Teste API</title>
+</head>
+<body>
+	<h1>Filmes de Star Wars</h1>
+	<ul id="movies">
+		<li class="template" style="display: none;">
+			<span class="title">Filme 1</span>
+			-
+			Episódio <span class="episode_id">X</span>
+			-
+			<span class="release_date">1979-00-00</span>
+		</li>
+	</ul>
+
+<button id="get_movies" type="button">Pegar Filmes</button>
+
+<script>
+(function() {
+  var httpRequest;
+  document.getElementById("get_movies").addEventListener('click', makeRequest);
+
+  function makeRequest() {
+    httpRequest = new XMLHttpRequest();
+
+    if (!httpRequest) {
+      alert('ERRO: não foi possível pegar os dados');
+      return false;
+    }
+    httpRequest.onreadystatechange = getFilms;
+    httpRequest.open('GET', 'https://swapi.co/api/films/');
+    httpRequest.send();
+  }
+
+  function getFilms() {
+    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+      if (httpRequest.status === 200) {
+        // console.log(httpRequest.responseText);
+        data = JSON.parse(httpRequest.responseText);
+        showFilms(data);
+      } else {
+        alert('Houve um problema com a requisição de dados.');
+      }
+    }
+  }
+
+  function showFilms(data){
+		// console.log(data);
+  	data.results.forEach(showFilm);
+  }
+
+  function showFilm(element, index, array){
+  	parent = document.getElementById("movies");
+  	newElement = parent.getElementsByClassName("template")[0].cloneNode(true);
+
+  	// console.log(59, element);
+
+  	// console.log(60, newElement.style);
+
+  	newElement.style.display = "block";
+  	newElement.getElementsByClassName("title")[0].textContent = element["title"];
+  	newElement.getElementsByClassName("episode_id")[0].textContent = element["episode_id"];
+  	newElement.getElementsByClassName("release_date")[0].textContent = element["release_date"];
+
+  	parent.appendChild(newElement); 	
+  }
+})();
+</script>
+
+</body>
+</html>
