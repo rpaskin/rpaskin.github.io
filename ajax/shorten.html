@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Teste Encurtador</title>
+</head>
+<body>
+	URL:
+	<input type="text" name="url" id="url" value="" placeholder="Entre a URL">
+
+	<br/>
+
+	<a href="#" id="encurtada">Resultado</span>
+
+	<br/>
+
+	<button id="encurtar" type="button">Encurtar</button>
+
+<script>
+  document.getElementById("encurtar").addEventListener('click', encurtar);
+
+  function encurtar(){
+
+		var data = "url="+encodeURIComponent(document.getElementById("url").value);
+
+		var xhr = new XMLHttpRequest();
+		xhr.withCredentials = true;
+
+		xhr.addEventListener("readystatechange", function () {
+			if (this.readyState === this.DONE) {
+				console.log(this.responseText);
+
+				var response = JSON.parse(this.responseText);
+
+				document.getElementById("encurtada").textContent = response.result_url;
+				document.getElementById("encurtada").href = response.result_url;
+			}
+		});
+
+		xhr.open("POST", "https://url-shortener-service.p.rapidapi.com/shorten");
+		xhr.setRequestHeader("x-rapidapi-host", "url-shortener-service.p.rapidapi.com");
+		xhr.setRequestHeader("x-rapidapi-key", "bc20d18a2cmsh8d3fa832d3ed73dp15399ajsn8d2b6e8ee115");
+		xhr.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+
+		xhr.send(data);
+  }
+
+</script>
+
+</body>
+</html>
+
+
