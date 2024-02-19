@@ -2,6 +2,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Smart Contract Interface</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -71,11 +72,16 @@ const clearLocalStorage = () => {
                     const inputField = document.createElement('input');
                     inputField.setAttribute('placeholder', input.type + ' ' + input.name);
                     inputField.id = item.name + '_input_' + index;
+                    inputField.className = 'form-control mb-1';
                     inputDiv.appendChild(inputField);
                 });
 
                 const callButton = document.createElement('button');
                 callButton.textContent = item.stateMutability === 'view' ? 'Call' : 'Send';
+
+                callButton.className = item.stateMutability === 'view' ? 'btn btn-info' : 'btn btn-warning';
+                funcDiv.className = 'mb-3'; // Add margin to each function div for spacing
+
                 funcDiv.appendChild(inputDiv);
                 funcDiv.appendChild(callButton);
 
@@ -123,14 +129,18 @@ const clearLocalStorage = () => {
         </script>
     </head>
     <body>
-        <h1>Smart Contract Interactor</h1>
-        <h4>ABI</h4>
-        <textarea id="abiInput" placeholder="Paste ABI here..."></textarea>
-        <h4>Contract Address</h4>
-        <input type="text" id="contractAddress" placeholder="Contract Address">
-        <button onclick="generateInterface()">Generate Interface</button>
-        <div id="interface"></div>
-        <hr>
-        <button onclick="clearLocalStorage()">Clear Local Storage</button>
+
+        <div class="container mt-4">
+            <h1>Smart Contract Interactor</h1>
+            <h4>ABI</h4>
+            <textarea id="abiInput" class="form-control mb-2" placeholder="Paste ABI here..."></textarea>
+            <h4>Contract Address</h4>
+            <input type="text" id="contractAddress" class="form-control mb-2" placeholder="Contract Address">
+            <button onclick="generateInterface()" class="btn btn-primary mb-3">Generate Interface</button>
+            <div id="interface"></div>
+            <!-- Clear Local Storage Button -->
+            <button onclick="clearLocalStorage()" class="btn btn-danger mt-2">Clear Local Storage</button>
+        </div>
+
     </body>
 </html>
