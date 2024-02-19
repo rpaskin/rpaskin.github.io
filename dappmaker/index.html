@@ -1,0 +1,135 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Smart Contract Interface</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+
+            textarea, input, button {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            #interface {
+                margin-top: 20px;
+            }
+        </style>
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+        <script>
+// Assumes ethers.js is already included in your HTML file
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Attempt to load ABI and contract address from localStorage
+    if (localStorage.getItem('abi') && localStorage.getItem('contractAddress')) {
+        document.getElementById('abiInput').value = localStorage.getItem('abi');
+        document.getElementById('contractAddress').value = localStorage.getItem('contractAddress');
+        generateInterface(); // Automatically generate the interface if ABI and address are found
+    }
+});
+
+
+const clearLocalStorage = () => {
+    localStorage.removeItem('abi');
+    localStorage.removeItem('contractAddress');
+    // Clear the interface and form fields
+    document.getElementById('interface').innerHTML = '';
+    document.getElementById('abiInput').value = '';
+    document.getElementById('contractAddress').value = '';
+    alert('Local storage cleared!');
+};
+
+
+    const generateInterface = async () => {
+        const abi = JSON.parse(document.getElementById('abiInput').value);
+        const contractAddress = document.getElementById('contractAddress').value;
+
+        // Save ABI and contract address to localStorage
+        localStorage.setItem('abi', JSON.stringify(abi));
+        localStorage.setItem('contractAddress', contractAddress);
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+        
+        const interfaceDiv = document.getElementById('interface');
+        interfaceDiv.innerHTML = ''; // Clear previous interface
+
+        abi.forEach((item) => {
+            if (item.type === 'function') {
+                const funcDiv = document.createElement('div');
+                const funcLabel = document.createElement('label');
+                funcLabel.textContent = item.name;
+                funcDiv.appendChild(funcLabel);
+
+                const inputDiv = document.createElement('div');
+
+                item.inputs.forEach((input, index) => {
+                    const inputField = document.createElement('input');
+                    inputField.setAttribute('placeholder', input.type + ' ' + input.name);
+                    inputField.id = item.name + '_input_' + index;
+                    inputDiv.appendChild(inputField);
+                });
+
+                const callButton = document.createElement('button');
+                callButton.textContent = item.stateMutability === 'view' ? 'Call' : 'Send';
+                funcDiv.appendChild(inputDiv);
+                funcDiv.appendChild(callButton);
+
+                // Create a div to display the result under the button
+                const resultDiv = document.createElement('div');
+                resultDiv.id = item.name + '_result';
+                funcDiv.appendChild(resultDiv);
+
+                callButton.onclick = async () => {
+                    const inputs = [];
+                    item.inputs.forEach((input, index) => {
+                        inputs.push(document.getElementById(item.name + '_input_' + index).value);
+                    });
+
+                    if (item.stateMutability === 'view' || item.stateMutability === 'pure') {
+                        try {
+                            const result = await contract[item.name](...inputs);
+                            // alert(JSON.stringify(result));
+                            const displayResult = ethers.BigNumber.isBigNumber(result) ? result.toString() : JSON.stringify(result);
+                            document.getElementById(item.name + '_result').textContent = 'Result: ' + displayResult;
+                        } catch (error) {
+                            console.error(error);
+                            // alert('Error calling the function');
+                            document.getElementById(item.name + '_result').textContent = 'Error calling the function';
+                        }
+                    } else {
+                        try {
+                            const tx = await contract[item.name](...inputs);
+                            await tx.wait();
+                            // alert('Transaction successful! Hash: ' + tx.hash);
+                            document.getElementById(item.name + '_result').textContent = 'Transaction successful! Hash: ' + receipt.transactionHash;
+                        } catch (error) {
+                            console.error(error);
+                            // alert('Error sending the transaction');
+                            document.getElementById(item.name + '_result').textContent = 'Error sending the transaction';
+                        }
+                    }
+                };
+
+                interfaceDiv.appendChild(funcDiv);
+            }
+        });
+    };
+
+        </script>
+    </head>
+    <body>
+        <h1>Smart Contract Interactor</h1>
+        <h4>ABI</h4>
+        <textarea id="abiInput" placeholder="Paste ABI here..."></textarea>
+        <h4>Contract Address</h4>
+        <input type="text" id="contractAddress" placeholder="Contract Address">
+        <button onclick="generateInterface()">Generate Interface</button>
+        <div id="interface"></div>
+        <button onclick="clearLocalStorage()">Clear Local Storage</button>
+    </body>
+</html>
