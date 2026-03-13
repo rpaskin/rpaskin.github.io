@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RefriToken</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body>
+    <h1>Interagir com RefriToken</h1>
+    
+    <button id="connectButton" onclick="connect()">Conectar MetaMask</button>
+    <p id="status">Status: Desconectado</p>
+
+    <div>
+        <h2>Criar Novo RefriToken</h2>
+        <label>ID:</label><input type="number" id="mintId"><br>
+        <label>Sabor:</label><input type="text" id="sabor"><br>
+        <label>Marca:</label><input type="text" id="marca"><br>
+        <label>Preço:</label><input type="number" id="preco"><br>
+        <label>Comprável:</label><input type="checkbox" id="compravel"><br>
+        <button onclick="mintRefri()">Criar</button>
+    </div>
+
+    <div>
+        <h2>Comprar RefriToken</h2>
+        <label>ID:</label><input type="number" id="compraId"><br>
+        <label>Novo Preço:</label><input type="number" id="novoPreco"><br>
+        <button onclick="comprarRefri()">Comprar</button>
+    </div>
+
+    <div>
+        <h2>Ajustar Venda de RefriToken</h2>
+        <label>ID:</label><input type="number" id="ajustarId"><br>
+        <label>Comprável:</label><input type="checkbox" id="ajustarCompravel"><br>
+        <button onclick="ajustarVenda()">Ajustar Venda</button>
+    </div>
+
+    <script>
+        const contractAddress = "0x8a432100bf416ef478c60dc01f823e191bd7f339fde5a7cb942abb93b8b0a2ac";
+        const abi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_novoPreco",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "ajustaPrecoBase",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "_compravel",
+                        "type": "bool"
+                    }
+                ],
+                "name": "ajustarVenda",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "internalType": "address",
+                        "name": "quemBloqueou",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "bool",
+                        "name": "bloqueado",
+                        "type": "bool"
+                    }
+                ],
+                "name": "Bloqueio",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_novoPreco",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "comprar",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "_id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "_dono",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "_sabor",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "_marca",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_preco",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "_compravel",
+                        "type": "bool"
+                    }
+                ],
+                "name": "mint",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "donoDoContrato",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "donos",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "precoBase",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "refriTokens",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "dono",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "sabor",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "marca",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "preco",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "compravel",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let contrato;
+        let provider;
+        let signer;
+
+        async function connect() {
+            if (window.ethereum) {
+                console.log("MetaMask detectado!");
+                try {
+                    await window.ethereum.request({ method: "eth_requestAccounts" });
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    contrato = new ethers.Contract(contractAddress, abi, signer);
+                    document.getElementById("connectButton").innerText = "Conectado";
+                    document.getElementById("status").innerText = "Status: Conectado";
+                    console.log("Conectado ao MetaMask");
+                    console.log("Provider:", provider);
+                    console.log("Signer:", signer);
+                } catch (error) {
+                    console.error("Usuário recusou a conexão", error);
+                    document.getElementById("status").innerText = "Status: Conexão recusada";
+                }
+            } else {
+                console.log("MetaMask não detectado");
+                alert("Por favor, instale MetaMask!");
+            }
+        }
+
+        async function mintRefri() {
+            if (!contrato) {
+                alert("Por favor, conecte ao MetaMask primeiro!");
+                return;
+            }
+
+            const id = document.getElementById("mintId").value;
+            const sabor = document.getElementById("sabor").value;
+            const marca = document.getElementById("marca").value;
+            const preco = document.getElementById("preco").value;
+            const compravel = document.getElementById("compravel").checked;
+            const valor = ethers.utils.parseEther("0.001");
+
+            try {
+                const tx = await contrato.mint(id, await signer.getAddress(), sabor, marca, preco, compravel, { value: valor });
+                await tx.wait();
+                alert("RefriToken criado com sucesso!");
+                console.log("Transação concluída:", tx);
+            } catch (error) {
+                console.error("Erro ao criar RefriToken", error);
+            }
+        }
+
+        async function comprarRefri() {
+            if (!contrato) {
+                alert("Por favor, conecte ao MetaMask primeiro!");
+                return;
+            }
+
+            const id = document.getElementById("compraId").value;
+            const novoPreco = document.getElementById("novoPreco").value;
+
+            try {
+                const refri = await contrato.refriTokens(id);
+                const valor = refri.preco;
+
+                const tx = await contrato.comprar(id, novoPreco, { value: valor });
+                await tx.wait();
+                alert("RefriToken comprado com sucesso!");
+                console.log("Transação concluída:", tx);
+            } catch (error) {
+                console.error("Erro ao comprar RefriToken", error);
+            }
+        }
+
+        async function ajustarVenda() {
+            if (!contrato) {
+                alert("Por favor, conecte ao MetaMask primeiro!");
+                return;
+            }
+
+            const id = document.getElementById("ajustarId").value;
+            const compravel = document.getElementById("ajustarCompravel").checked;
+
+            try {
+                const tx = await contrato.ajustarVenda(id, compravel);
+                await tx.wait();
+                alert("Venda ajustada com sucesso!");
+                console.log("Transação concluída:", tx);
+            } catch (error) {
+                console.error("Erro ao ajustar venda", error);
+            }
+        }
+    </script>
+</body>
+</html>

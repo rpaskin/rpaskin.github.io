@@ -20,17 +20,59 @@
         </style>
         <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
         <script>
-// Assumes ethers.js is already included in your HTML file
+// Function to get the anchor ID from the URL
+function getAnchorId() {
+  const anchorId = window.location.hash.substring(1); // Remove the '#' from the beginning
+  return anchorId;
+}
 
+// Function to fetch data from Firestore based on the ID from the URL
+async function fetchDataById(id) {
+  try {
+    const docRef = doc(db, "dapps", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+        // Use the document data as needed in your application
+        document.getElementById('abiInput').value = docSnap.data();
+        document.getElementById('contractAddress').value = id;
+        generateInterface(); // Automatically generate the interface if ABI and address are found
+
+    } else {
+      console.log("No such document!");
+    }
+  } catch (e) {
+    console.error("Error fetching document: ", e);
+  }
+}
+
+// Assumes ethers.js is already included in your HTML file
 document.addEventListener('DOMContentLoaded', function() {
     // Attempt to load ABI and contract address from localStorage
-    if (localStorage.getItem('abi') && localStorage.getItem('contractAddress')) {
-        document.getElementById('abiInput').value = localStorage.getItem('abi');
-        document.getElementById('contractAddress').value = localStorage.getItem('contractAddress');
-        generateInterface(); // Automatically generate the interface if ABI and address are found
+    // if (localStorage.getItem('abi') && localStorage.getItem('contractAddress')) {
+    //     document.getElementById('abiInput').value = localStorage.getItem('abi');
+    //     document.getElementById('contractAddress').value = localStorage.getItem('contractAddress');
+    //     generateInterface(); // Automatically generate the interface if ABI and address are found
+    // }
+
+    const id = getAnchorId();
+    console.log("Id do contrato na URL:", id); // Outputs: "your-id"
+    if (id) {
+        fetchDataById(id);
     }
 });
 
+async function getData() {
+  const querySnapshot = await getDocs(collection(db, "dapps"));
+  querySnapshot.forEach((doc) => {
+    console.log(`${doc.id} => ${doc.data()}`);
+  });
+}
+
+async function saveData(data, docId) {
+  await setDoc(doc(db, "dapps", docId), data);
+}
 
 const clearLocalStorage = () => {
     localStorage.removeItem('abi');
@@ -47,9 +89,10 @@ const clearLocalStorage = () => {
         const abi = JSON.parse(document.getElementById('abiInput').value);
         const contractAddress = document.getElementById('contractAddress').value;
 
-        // Save ABI and contract address to localStorage
-        localStorage.setItem('abi', JSON.stringify(abi));
+        // // Save ABI and contract address to localStorage
+        // localStorage.setItem('abi', JSON.stringify(abi));
         localStorage.setItem('contractAddress', contractAddress);
+        saveData(JSON.stringify(abi), contractAddress+'_ABI');
 
         const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
         await provider.send("eth_requestAccounts", []);
@@ -141,6 +184,33 @@ const clearLocalStorage = () => {
             <!-- Clear Local Storage Button -->
             <button onclick="clearLocalStorage()" class="btn btn-danger mt-2">Clear Local Storage</button>
         </div>
+
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+            import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+          
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+              apiKey: "AIzaSyBVe8wnWN4cLeS8q8AVVki7xmu4R5QLMuo",
+              authDomain: "dappmaker-50cc5.firebaseapp.com",
+              projectId: "dappmaker-50cc5",
+              storageBucket: "dappmaker-50cc5.appspot.com",
+              messagingSenderId: "368913732539",
+              appId: "1:368913732539:web:22e2e36ec005ec01b4aa9e",
+              measurementId: "G-2JDLS1581J"
+            };
+          
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const analytics = getAnalytics(app);
+          </script>
 
     </body>
 </html>
