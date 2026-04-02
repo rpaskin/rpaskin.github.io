@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="slides-format" content="viewport">
+  <title>AI Steps – Escola ORT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #0a0f1e;
+      --color-bg-deep: #05080f;
+      --color-surface: #111827;
+      --color-text: #f1f5f9;
+      --color-text-secondary: #cbd5e1;
+      --color-text-muted: #94a3b8;
+      --color-accent-1: #3B82F6;
+      --color-accent-2: #818CF8;
+      --color-accent-3: #38BDF8;
+      --color-glass-bg: rgba(255,255,255,0.05);
+      --color-glass-border: rgba(255,255,255,0.09);
+      --color-vignette: rgba(0,0,0,0.45);
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+  </style>
+  <style>
+    :root { --color-bg: #0a0f1e; --color-text: #f1f5f9; --glow-color-rgb: 59,130,246; }
+    *,*::before,*::after { box-sizing: border-box; }
+    html,body { background: var(--color-bg); margin: 0; }
+    body { font-family: 'DM Sans', sans-serif; color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position:absolute; top:0; left:0; width:100%; height:100%; background:var(--color-bg); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transform:scale(0.95); transition:opacity 0.7s ease, transform 0.7s ease; pointer-events:none; overflow:hidden; }
+    .slide.active { opacity:1; transform:scale(1); pointer-events:all; }
+    .slide>.content { position:relative; z-index:2; width:100%; max-width:1100px; padding:clamp(1.5rem,4vw,3.5rem); }
+    .nav-controls { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:16px; z-index:100; background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); padding:10px 24px; border-radius:40px; border:1px solid rgba(255,255,255,0.09); }
+    .nav-btn { width:38px; height:38px; border:none; background:rgba(255,255,255,0.05); color:#3B82F6; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .slide-dots { display:flex; gap:8px; }
+    .slide-dots .dot { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,0.18); cursor:pointer; transition:background 0.3s, transform 0.3s; }
+    .slide-dots .dot.active { background:#3B82F6; transform:scale(1.3); }
+    .slide-counter { font-size:0.78rem; color:#94a3b8; min-width:38px; text-align:center; }
+    .reveal { opacity:0; transform:translateY(20px); }
+    @keyframes float { 0%,100% { transform:translateY(0);} 50% { transform:translateY(-15px);} }
+    @keyframes float-slow { 0% { transform:translate(0,0) scale(1);} 25% { transform:translate(60px,-50px) scale(1.12);} 50% { transform:translate(-40px,40px) scale(0.9);} 75% { transform:translate(50px,20px) scale(1.08);} 100% { transform:translate(0,0) scale(1);} }
+    @keyframes float-drift { 0% { transform:translate(0,0) scale(1) rotate(0deg);} 33% { transform:translate(-50px,-60px) scale(1.15) rotate(3deg);} 66% { transform:translate(40px,30px) scale(0.88) rotate(-2deg);} 100% { transform:translate(0,0) scale(1) rotate(0deg);} }
+    .gradient-mesh { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+    .blob { position:absolute; border-radius:50%; filter:blur(80px); animation:float-slow 10s ease-in-out infinite; }
+    .blob:nth-child(2) { animation:float-drift 14s ease-in-out infinite; }
+    .blob:nth-child(3) { animation:float-slow 18s ease-in-out infinite reverse; }
+    .slide::before { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; opacity:0.03; mix-blend-mode:overlay; }
+    .slide::after { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%); }
+    .timeline-line { position:absolute; left:20px; top:0; bottom:0; width:2px; background:linear-gradient(to bottom, #3B82F6, #818CF8, #38BDF8); }
+    .timeline-dot { width:14px; height:14px; border-radius:50%; background:#3B82F6; box-shadow:0 0 10px rgba(59,130,246,0.7); flex-shrink:0; }
+    .module-tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; background:rgba(59,130,246,0.15); color:#93C5FD; border:1px solid rgba(59,130,246,0.25); }
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;pointer-events:none;"></div>
+<div class="deck">
+  <div class="slide active" data-slide="1">
+    <div class="gradient-mesh"><div class="blob" style="width:500px;height:500px;top:-120px;right:-100px;background:#3B82F6;opacity:0.14;"></div><div class="blob" style="width:350px;height:350px;bottom:-100px;left:-80px;background:#818CF8;opacity:0.12;"></div><div class="blob" style="width:220px;height:220px;top:38%;left:12%;background:#38BDF8;opacity:0.09;"></div></div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div style="font-size:100px;animation:float 3s ease-in-out infinite;display:inline-block;margin-bottom:1.2rem;" class="reveal">🤖</div>
+      <h1 class="font-display text-[clamp(2.8rem,6.5vw,5.2rem)] font-black bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent tracking-tight mb-3 reveal" style="line-height:1.1;">AI Steps</h1>
+      <p class="text-[clamp(1rem,1.8vw,1.4rem)] font-light text-text-muted tracking-[5px] uppercase mb-4 reveal">LEARN AI · GROW · LEAD</p>
+      <div class="reveal" style="display:inline-block;padding:8px 24px;border-radius:30px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.08);font-size:0.95rem;color:#93C5FD;margin-top:0.5rem;">Formação em Inteligência Artificial para a equipe ORT</div>
+    </div>
+  </div>
+  <div class="slide" data-slide="2">
+    <div class="gradient-mesh"><div class="blob" style="width:380px;height:380px;top:-80px;right:-60px;background:#3B82F6;opacity:0.08;"></div><div class="blob" style="width:260px;height:260px;bottom:-70px;left:-50px;background:#818CF8;opacity:0.07;"></div></div>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Contexto</div>
+      <h2 class="font-display text-[clamp(2rem,4.5vw,3.2rem)] font-bold mb-2 reveal" style="line-height:1.15;">O mundo mudou.<br><span style="background:linear-gradient(90deg,#3B82F6,#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">A escola precisa liderar.</span></h2>
+      <p class="text-text-secondary text-lg mb-8 reveal">A IA está transformando todas as profissões — e os funcionários da ORT precisam estar à frente dessa transformação para ensinar pelo exemplo.</p>
+      <div class="grid grid-cols-3 gap-5 reveal">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6"><div style="font-size:2rem;margin-bottom:0.7rem;">⚡</div><div class="font-semibold text-text mb-1">Velocidade</div><div class="text-text-muted text-sm">Ferramentas de IA evoluem a cada semana — ficar parado é ficar para trás</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6"><div style="font-size:2rem;margin-bottom:0.7rem;">🎓</div><div class="font-semibold text-text mb-1">Credibilidade</div><div class="text-text-muted text-sm">Funcionários que dominam IA têm mais autoridade e impacto junto aos alunos</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6"><div style="font-size:2rem;margin-bottom:0.7rem;">🔧</div><div class="font-semibold text-text mb-1">Produtividade</div><div class="text-text-muted text-sm">IA reduz tarefas repetitivas e libera energia para o que realmente importa</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide" data-slide="3">
+    <div class="gradient-mesh"><div class="blob" style="width:420px;height:420px;top:-100px;left:-80px;background:#818CF8;opacity:0.1;"></div><div class="blob" style="width:280px;height:280px;bottom:-60px;right:-60px;background:#38BDF8;opacity:0.08;"></div></div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Programa</div>
+      <h2 class="font-display text-[clamp(1.8rem,4vw,3rem)] font-bold mb-6 reveal">O que é o <em>AI Steps</em>?</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="reveal">
+          <p class="text-text-secondary text-lg mb-6">AI Steps é um programa de formação prática em Inteligência Artificial. Para funcionários, a proposta é simples: <strong class="text-text">aprender fazendo</strong>, com ferramentas reais e desafios do cotidiano escolar.</p>
+          <div class="flex flex-col gap-4">
+            <div class="flex gap-3 items-start"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#818CF8);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">✏️</div><div><div class="font-semibold text-sm">Aprender</div><div class="text-text-muted text-sm">Ferramentas de IA para texto, pesquisa, imagens, apresentações e mais</div></div></div>
+            <div class="flex gap-3 items-start"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#818CF8,#38BDF8);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">🛠️</div><div><div class="font-semibold text-sm">Criar</div><div class="text-text-muted text-sm">Projetos práticos com Challenge Based Learning (CBL)</div></div></div>
+            <div class="flex gap-3 items-start"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#38BDF8,#3B82F6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">🎤</div><div><div class="font-semibold text-sm">Apresentar</div><div class="text-text-muted text-sm">Pitch de soluções reais ao final de cada módulo</div></div></div>
+          </div>
+        </div>
+        <div class="reveal bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-7 flex flex-col justify-between" style="border-left:3px solid #3B82F6;">
+          <div><div class="text-text-muted text-xs uppercase tracking-widest mb-3">Metodologia base</div><div class="font-display text-2xl font-bold mb-4" style="background:linear-gradient(90deg,#3B82F6,#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Challenge Based Learning</div><div class="flex flex-col gap-3 text-sm"><div class="flex gap-3 items-center"><span style="background:#3B82F6;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:0.7rem;">1</span><span class="text-text-secondary"><strong class="text-text">Engage</strong> — Big Idea → Questão Essencial → Desafio</span></div><div class="flex gap-3 items-center"><span style="background:#818CF8;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:0.7rem;">2</span><span class="text-text-secondary"><strong class="text-text">Investigate</strong> — Pesquisa guiada → Experimentos → Síntese</span></div><div class="flex gap-3 items-center"><span style="background:#38BDF8;color:#0a0f1e;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:0.7rem;">3</span><span class="text-text-secondary"><strong class="text-text">Act</strong> — Solução → Implementação → Pitch</span></div></div></div>
+          <div class="mt-4 text-xs text-text-muted border-t border-glass-border pt-3">Metodologia validada internacionalmente, alinhada ao DNA da Escola ORT: STEAM + Maker + Autonomia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide" data-slide="4">
+    <div class="gradient-mesh"><div class="blob" style="width:400px;height:400px;top:-90px;right:-70px;background:#38BDF8;opacity:0.08;"></div><div class="blob" style="width:300px;height:300px;bottom:-80px;left:-60px;background:#3B82F6;opacity:0.08;"></div></div>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Alinhamento Pedagógico</div>
+      <h2 class="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold mb-6 reveal">Por que AI Steps <em>encaixa perfeitamente</em> na ORT?</h2>
+      <div class="grid grid-cols-2 gap-5 reveal">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-5"><div class="flex gap-3 items-center mb-3"><span style="font-size:1.6rem;">🔬</span><span class="font-semibold">STEAM + Maker</span></div><div class="text-text-muted text-sm">A ORT integra ciência, tecnologia, arte e engenharia. O AI Steps expande isso para IA generativa, onde os funcionários criam, experimentam e constroem soluções reais.</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-5"><div class="flex gap-3 items-center mb-3"><span style="font-size:1.6rem;">🎯</span><span class="font-semibold">Aprendizagem Ativa</span></div><div class="text-text-muted text-sm">Assim como a ORT valoriza protagonismo e aprendizado por projetos, o AI Steps coloca o funcionário como produtor — não apenas receptor — do conhecimento.</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-5"><div class="flex gap-3 items-center mb-3"><span style="font-size:1.6rem;">🛤️</span><span class="font-semibold">Personalização</span></div><div class="text-text-muted text-sm">Assim como os Itinerários Formativos da ORT respeitam os perfis dos alunos, o AI Steps permite que cada funcionário aplique a IA na sua área de atuação.</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-5"><div class="flex gap-3 items-center mb-3"><span style="font-size:1.6rem;">🌐</span><span class="font-semibold">Tecnologia de Ponta</span></div><div class="text-text-muted text-sm">A missão da ORT é capacitar pessoas com tecnologias de ponta. Nada mais alinhado do que incluir IA como ferramenta do dia a dia da equipe.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide" data-slide="5">
+    <div class="gradient-mesh"><div class="blob" style="width:380px;height:380px;top:-80px;left:-70px;background:#818CF8;opacity:0.09;"></div><div class="blob" style="width:250px;height:250px;bottom:-50px;right:-50px;background:#38BDF8;opacity:0.07;"></div></div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+      <div class="module-tag reveal mb-3">Estrutura do Curso</div>
+      <h2 class="font-display text-[clamp(1.7rem,3.8vw,2.7rem)] font-bold mb-5 reveal">3 Módulos de 10 semanas</h2>
+      <div class="grid grid-cols-3 gap-5 reveal">
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6" style="border-top:3px solid #3B82F6;"><div style="background:linear-gradient(135deg,#3B82F6,#818CF8);color:#fff;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-bottom:0.8rem;">01</div><div class="font-semibold mb-2">Textos, Pesquisa & Apresentações</div><div class="text-text-muted text-sm mb-3">ChatGPT, Gemini, Perplexity, Gamma, Copilot e mais. Automatize tarefas, crie documentos e melhore comunicações.</div><div style="padding:5px 10px;border-radius:20px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);font-size:0.72rem;color:#93C5FD;display:inline-block;">⭐ Pitch Final</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6" style="border-top:3px solid #818CF8;"><div style="background:linear-gradient(135deg,#818CF8,#38BDF8);color:#fff;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-bottom:0.8rem;">02</div><div class="font-semibold mb-2">Imagens, Interações & Voz com IA</div><div class="text-text-muted text-sm mb-3">Midjourney, DALL·E, ElevenLabs, HeyGen. Crie visuais, interaja por voz e experimente em diferentes idiomas.</div><div style="padding:5px 10px;border-radius:20px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.2);font-size:0.72rem;color:#C7D2FE;display:inline-block;">⭐ Pitch Final</div></div>
+        <div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6" style="border-top:3px solid #38BDF8;"><div style="background:linear-gradient(135deg,#38BDF8,#3B82F6);color:#0a0f1e;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-bottom:0.8rem;">03</div><div class="font-semibold mb-2">Música & Vídeo com IA</div><div class="text-text-muted text-sm mb-3">Suno, Udio, Runway, Pika. Produza conteúdo audiovisual criativo para uso institucional e pedagógico.</div><div style="padding:5px 10px;border-radius:20px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);font-size:0.72rem;color:#BAE6FD;display:inline-block;">⭐ Pitch Final</div></div>
+      </div>
+      <div class="flex gap-6 mt-5 reveal"><div class="flex gap-2 items-center text-sm text-text-muted"><span style="color:#3B82F6;">●</span> 2h de aula semanal</div><div class="flex gap-2 items-center text-sm text-text-muted"><span style="color:#818CF8;">●</span> 1h de mentoria em grupo</div><div class="flex gap-2 items-center text-sm text-text-muted"><span style="color:#38BDF8;">●</span> Turmas de 12 a 25 pessoas</div><div class="flex gap-2 items-center text-sm text-text-muted"><span style="color:#93C5FD;">●</span> Ferramentas majoritariamente gratuitas</div></div>
+    </div>
+  </div>
+  <div class="slide" data-slide="6">
+    <div class="gradient-mesh"><div class="blob" style="width:420px;height:420px;top:-100px;right:-80px;background:#3B82F6;opacity:0.1;"></div><div class="blob" style="width:270px;height:270px;bottom:-60px;left:-50px;background:#818CF8;opacity:0.08;"></div></div>
+    <div class="content">
+      <div class="module-tag reveal mb-3">Módulo 1 — Foco Funcionários</div>
+      <h2 class="font-display text-[clamp(1.7rem,3.8vw,2.7rem)] font-bold mb-5 reveal">Primeiro Passo:<br><em>IA no dia a dia de trabalho</em></h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="reveal flex flex-col gap-4"><p class="text-text-secondary">Antes de ensinar IA aos alunos, a equipe ORT <strong class="text-text">precisa vivenciar a IA</strong>. O Módulo 1 é desenhado para que cada funcionário saia com usos concretos para sua rotina.</p><div class="flex flex-col gap-3"><div class="bg-glass-bg border border-glass-border rounded-lg p-4 flex gap-3 items-start"><span style="font-size:1.4rem;flex-shrink:0;">📝</span><div><div class="font-semibold text-sm mb-1">Equipe Administrativa</div><div class="text-text-muted text-sm">Redigir comunicados, resumir atas, criar planilhas com IA</div></div></div><div class="bg-glass-bg border border-glass-border rounded-lg p-4 flex gap-3 items-start"><span style="font-size:1.4rem;flex-shrink:0;">🖥️</span><div><div class="font-semibold text-sm mb-1">Coordenação Pedagógica</div><div class="text-text-muted text-sm">Planejar sequências didáticas, criar rubricas, analisar feedbacks</div></div></div><div class="bg-glass-bg border border-glass-border rounded-lg p-4 flex gap-3 items-start"><span style="font-size:1.4rem;flex-shrink:0;">📣</span><div><div class="font-semibold text-sm mb-1">Comunicação & Marketing</div><div class="text-text-muted text-sm">Posts, e-mails, apresentações e materiais visuais com IA</div></div></div></div></div>
+        <div class="reveal flex flex-col gap-4"><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6" style="border-left:3px solid #3B82F6;"><div class="text-text-muted text-xs uppercase tracking-widest mb-3">Ciclo CBL aplicado à equipe</div><div class="flex flex-col gap-4"><div><div class="font-semibold text-sm text-accent-1 mb-1">🔥 Engage</div><div class="text-text-muted text-sm">Big Idea: “Como a IA pode transformar meu trabalho na ORT?” → Desafio real do cotidiano de cada área</div></div><div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:12px;"><div class="font-semibold text-sm text-accent-2 mb-1">🔍 Investigate</div><div class="text-text-muted text-sm">Experimentação guiada de ferramentas de IA para o contexto específico de cada funcionário</div></div><div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:12px;"><div class="font-semibold text-sm text-accent-3 mb-1">🚀 Act</div><div class="text-text-muted text-sm">Solução implementada na própria ORT + Pitch apresentado para a equipe</div></div></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide" data-slide="7">
+    <div class="gradient-mesh"><div class="blob" style="width:450px;height:450px;top:-110px;left:-90px;background:#3B82F6;opacity:0.09;"></div><div class="blob" style="width:300px;height:300px;bottom:-70px;right:-70px;background:#38BDF8;opacity:0.08;"></div></div>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Resultados</div>
+      <h2 class="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold mb-3 reveal">O que a equipe ORT <em>vai ganhar</em>?</h2>
+      <p class="text-text-muted mb-6 reveal">Ao final do programa, os funcionários terão:</p>
+      <div class="grid grid-cols-2 gap-5 reveal"><div class="flex flex-col gap-4"><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">🧠</div><div><div class="font-semibold mb-1">Compreensão real da IA</div><div class="text-text-muted text-sm">Entenderão o que a IA faz, o que não faz, e como usá-la com segurança e criticidade no ambiente escolar</div></div></div><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">⚙️</div><div><div class="font-semibold mb-1">Produtividade aumentada</div><div class="text-text-muted text-sm">Usarão IA para automatizar tarefas repetitivas e dedicar mais tempo ao que realmente importa</div></div></div><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">🤝</div><div><div class="font-semibold mb-1">Soluções para a ORT</div><div class="text-text-muted text-sm">Cada funcionário desenvolverá um projeto com solução real e aplicável na sua área dentro da escola</div></div></div></div><div class="flex flex-col gap-4"><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">🏅</div><div><div class="font-semibold mb-1">Certificado de Conclusão</div><div class="text-text-muted text-sm">Reconhecimento formal das habilidades em IA adquiridas ao longo do programa</div></div></div><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">🌱</div><div><div class="font-semibold mb-1">Cultura de Inovação</div><div class="text-text-muted text-sm">Fortalecimento do DNA inovador da ORT, com uma equipe que lidera pela experiência e pelo exemplo</div></div></div><div class="flex gap-4 items-start bg-glass-bg border border-glass-border rounded-xl p-5"><div style="font-size:1.8rem;flex-shrink:0;">📚</div><div><div class="font-semibold mb-1">Portfólio de Projetos</div><div class="text-text-muted text-sm">Cada participante sai com projetos documentados e prontos para apresentação institucional</div></div></div></div></div>
+    </div>
+  </div>
+  <div class="slide" data-slide="8">
+    <div class="gradient-mesh"><div class="blob" style="width:380px;height:380px;top:-80px;right:-60px;background:#818CF8;opacity:0.1;"></div><div class="blob" style="width:260px;height:260px;bottom:-60px;left:-50px;background:#3B82F6;opacity:0.08;"></div></div>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Formato & Modalidade</div>
+      <h2 class="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold mb-6 reveal">Como funciona na prática?</h2>
+      <div class="grid grid-cols-3 gap-5 mb-6 reveal"><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 text-center"><div style="font-size:2.2rem;margin-bottom:0.8rem;">🏫</div><div class="font-semibold mb-2">Presencial</div><div class="text-text-muted text-sm">Aulas na própria unidade ORT. Facilitador vai até a escola. Interação direta e trabalho em grupo.</div></div><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 text-center" style="border-color:rgba(59,130,246,0.3);"><div style="font-size:2.2rem;margin-bottom:0.8rem;">💻</div><div class="font-semibold mb-2">Ao Vivo Online</div><div class="text-text-muted text-sm">Aulas síncronas por videoconferência. Sem necessidade de espaço físico. Gravações disponíveis na plataforma.</div></div><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl p-6 text-center"><div style="font-size:2.2rem;margin-bottom:0.8rem;">🔀</div><div class="font-semibold mb-2">Híbrido</div><div class="text-text-muted text-sm">Combinação flexível entre presencial e online, adaptada ao calendário da ORT.</div></div></div>
+      <div class="reveal"><div class="text-text-muted text-sm mb-3 uppercase tracking-widest text-xs">O que cada participante recebe</div><div class="flex flex-wrap gap-3"><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">🎥 Aulas gravadas</div><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">📄 Material didático em PDF</div><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">💬 Feedback individual</div><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">🏅 Certificado</div><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">🗂️ Portfólio de projetos</div><div style="padding:8px 16px;border-radius:30px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.18);font-size:0.82rem;color:#93C5FD;">👥 Mentoria semanal em grupo</div></div></div>
+    </div>
+  </div>
+  <div class="slide" data-slide="9">
+    <div class="gradient-mesh"><div class="blob" style="width:500px;height:500px;top:-130px;right:-120px;background:#3B82F6;opacity:0.15;"></div><div class="blob" style="width:350px;height:350px;bottom:-100px;left:-80px;background:#818CF8;opacity:0.12;"></div><div class="blob" style="width:200px;height:200px;top:40%;left:10%;background:#38BDF8;opacity:0.09;"></div></div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content">
+      <div class="module-tag reveal mb-4">Próximos Passos</div>
+      <h2 class="font-display text-[clamp(2rem,4.5vw,3.2rem)] font-bold mb-7 reveal">Vamos <em>começar?</em></h2>
+      <div class="flex flex-col gap-4 mb-8 reveal" style="position:relative;padding-left:44px;"><div class="timeline-line"></div><div class="flex gap-4 items-start"><div class="timeline-dot" style="margin-top:4px;"></div><div class="bg-glass-bg border border-glass-border rounded-xl p-5 flex-1"><div class="font-semibold mb-1">1. Reunião de alinhamento</div><div class="text-text-muted text-sm">Conversa com a liderança da ORT para definir perfil da turma, áreas prioritárias e objetivos institucionais</div></div></div><div class="flex gap-4 items-start"><div class="timeline-dot" style="margin-top:4px;background:#818CF8;box-shadow:0 0 10px rgba(129,140,248,0.7);"></div><div class="bg-glass-bg border border-glass-border rounded-xl p-5 flex-1"><div class="font-semibold mb-1">2. Definição da modalidade</div><div class="text-text-muted text-sm">Escolha entre presencial, online ao vivo ou híbrido — de acordo com a agenda da escola</div></div></div><div class="flex gap-4 items-start"><div class="timeline-dot" style="margin-top:4px;background:#38BDF8;box-shadow:0 0 10px rgba(56,189,248,0.7);"></div><div class="bg-glass-bg border border-glass-border rounded-xl p-5 flex-1"><div class="font-semibold mb-1">3. Inscrições com desconto exclusivo</div><div class="text-text-muted text-sm">Contrato institucional com condições especiais para a Rede ORT</div></div></div><div class="flex gap-4 items-start"><div class="timeline-dot" style="margin-top:4px;background:#93C5FD;box-shadow:0 0 10px rgba(147,197,253,0.7);"></div><div class="bg-glass-bg border border-glass-border rounded-xl p-5 flex-1"><div class="font-semibold mb-1">4. Kick-off da primeira turma</div><div class="text-text-muted text-sm">Início do programa com a equipe ORT — prontos para aprender, criar e liderar com IA</div></div></div></div>
+    </div>
+  </div>
+  <div class="slide" data-slide="10">
+    <div class="gradient-mesh"><div class="blob" style="width:600px;height:600px;top:-150px;right:-150px;background:#3B82F6;opacity:0.15;"></div><div class="blob" style="width:400px;height:400px;bottom:-120px;left:-100px;background:#818CF8;opacity:0.12;"></div><div class="blob" style="width:250px;height:250px;top:35%;left:10%;background:#38BDF8;opacity:0.1;"></div></div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center"><div style="font-size:90px;animation:float 3s ease-in-out infinite;display:inline-block;margin-bottom:1rem;" class="reveal">🚀</div><h1 class="font-display text-[clamp(2.2rem,5vw,4rem)] font-black bg-linear-to-br from-accent-1 via-accent-2 to-accent-1 bg-clip-text text-transparent tracking-tight mb-3 reveal" style="line-height:1.1;">AI Steps na ORT</h1><p class="text-[clamp(0.95rem,1.6vw,1.25rem)] text-text-secondary mb-2 reveal">A porta de entrada da equipe para o uso inteligente da IA.</p><p class="text-text-muted text-base mb-7 reveal">Uma formação prática, colaborativa e conectada à realidade da escola.</p><div class="flex justify-center gap-5 reveal"><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl px-8 py-4"><div class="text-text-muted text-xs uppercase tracking-widest mb-1">Contato</div><div class="font-semibold text-accent-1">suporte@steps.ai.br</div></div><div class="bg-glass-bg backdrop-blur-xl border border-glass-border rounded-xl px-8 py-4"><div class="text-text-muted text-xs uppercase tracking-widest mb-1">Site</div><div class="font-semibold text-accent-2">aisteps.education</div></div></div><p class="text-text-muted text-xs mt-6 reveal tracking-widest uppercase">LEARN AI · GROW · LEAD</p></div>
+  </div>
+</div>
+<div class="nav-controls"><button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button><div class="slide-dots" id="dots"></div><button class="nav-btn" onclick="changeSlide(1)">&#8250;</button><span class="slide-counter" id="counter">1 / 10</span></div>
+<script>
+let current=1; const total=document.querySelectorAll('.slide').length; const dotsContainer=document.getElementById('dots'); const counter=document.getElementById('counter');
+for(let i=1;i<=total;i++){const dot=document.createElement('div'); dot.className='dot'+(i===1?' active':''); dot.onclick=()=>goToSlide(i); dotsContainer.appendChild(dot);} 
+function goToSlide(n){const prev=document.querySelector('.slide.active'); const next=document.querySelector(`.slide[data-slide="${n}"]`); if(prev) prev.classList.remove('active'); if(next){next.classList.add('active'); animateSlide(next);} current=n; updateNav();}
+function changeSlide(dir){let next=current+dir; if(next<1) next=total; if(next>total) next=1; goToSlide(next);} 
+function updateNav(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i+1===current)); counter.textContent=current+' / '+total;} 
+document.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();changeSlide(1);} if(e.key==='ArrowLeft'){e.preventDefault();changeSlide(-1);} });
+let touchStartX=0; document.addEventListener('touchstart',(e)=>{touchStartX=e.touches[0].clientX;}); document.addEventListener('touchend',(e)=>{const diff=touchStartX-e.changedTouches[0].clientX; if(Math.abs(diff)>50) changeSlide(diff>0?1:-1);});
+function animateSlide(slide){slide.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transition='none'; el.style.opacity='0'; el.style.transform='translateY(20px)'; el.offsetHeight; const delay=i*0.08; el.style.transition=`opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`; el.style.opacity='1'; el.style.transform='translateY(0px)';});}
+document.addEventListener('mousemove',(e)=>{const spotlight=document.querySelector('.mouse-spotlight'); if(spotlight){spotlight.style.background=`radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(59,130,246,0.06), transparent 40%)`;}});
+window.initParticles=function(canvas,options){if(!canvas) return; const ctx=canvas.getContext('2d'); canvas.width=canvas.offsetWidth||window.innerWidth; canvas.height=canvas.offsetHeight||window.innerHeight; const interactive=options.interactive!==false; const count=options.count||(interactive?55:18); let mx=-1000,my=-1000; const particles=Array.from({length:count},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,size:Math.random()*2.5+0.8,alpha:Math.random()*0.35+0.1})); if(interactive){canvas.addEventListener('mousemove',(e)=>{const rect=canvas.getBoundingClientRect(); mx=e.clientX-rect.left; my=e.clientY-rect.top;}); canvas.addEventListener('mouseleave',()=>{mx=-1000; my=-1000;});} (function animate(){ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{if(interactive){const dx=p.x-mx, dy=p.y-my, dist=Math.sqrt(dx*dx+dy*dy); if(dist<120){const force=(120-dist)/120*2; p.vx+=(dx/dist)*force*0.1; p.vy+=(dy/dist)*force*0.1;}} p.vx*=0.98; p.vy*=0.98; p.x+=p.vx; p.y+=p.vy; if(p.x<0) p.x=canvas.width; if(p.x>canvas.width) p.x=0; if(p.y<0) p.y=canvas.height; if(p.y>canvas.height) p.y=0; ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fillStyle=`rgba(59,130,246,${p.alpha})`; ctx.fill();}); requestAnimationFrame(animate);})();};
+document.querySelectorAll('.particle-canvas').forEach(c=>window.initParticles(c,{interactive:true,count:55})); document.querySelectorAll('.particle-canvas-ambient').forEach(c=>window.initParticles(c,{interactive:false,count:18}));
+try{animateSlide(document.querySelector('.slide.active'));}catch(e){}
+</script>
+</body>
+</html>
