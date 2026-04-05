@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="slides-format" content="viewport" />
+  <title>world-ort-ai-cbl-pitch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #eef5fb;
+      --color-bg-deep: #dfeaf5;
+      --color-surface: #ffffff;
+      --color-text: #11324d;
+      --color-text-secondary: #34526d;
+      --color-text-muted: #5f7890;
+      --color-accent-1: #0f5b8d;
+      --color-accent-2: #0fa3b1;
+      --color-accent-3: #e58c2f;
+      --color-glass-bg: rgba(255,255,255,0.84);
+      --color-glass-border: rgba(17,50,77,0.10);
+      --color-vignette: rgba(9,34,58,0.06);
+      --font-display: 'Source Serif 4', serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    :root { --color-bg: #eef5fb; --color-text: #11324d; --glow-color-rgb: 15,91,141; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { background: var(--color-bg); margin: 0; }
+    body { font-family: var(--font-body); color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; inset: 0; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.97); transition: opacity .6s ease, transform .6s ease; pointer-events: none; overflow: hidden; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+    .slide>.content { position: relative; z-index: 2; width: 100%; max-width: 1180px; padding: clamp(1.25rem, 3vw, 3rem); }
+    .nav-controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; z-index: 100; background: rgba(255,255,255,.82); backdrop-filter: blur(10px); padding: 10px 22px; border-radius: 999px; border: 1px solid rgba(17,50,77,.12); box-shadow: 0 8px 24px rgba(17,50,77,.08); }
+    .nav-btn { width: 38px; height: 38px; border: none; background: rgba(15,91,141,.08); color: #0f5b8d; border-radius: 999px; font-size: 1.15rem; cursor: pointer; }
+    .slide-dots { display:flex; gap:8px; }
+    .dot { width:10px; height:10px; border-radius:999px; background: rgba(17,50,77,.16); cursor:pointer; }
+    .dot.active { background:#0f5b8d; transform:scale(1.2); }
+    .slide-counter { color:#5f7890; font-size:.85rem; min-width:44px; text-align:center; }
+    .reveal { opacity: 0; transform: translateY(18px); }
+    .gradient-mesh { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+    .blob { position:absolute; border-radius:50%; filter: blur(70px); animation: float 16s ease-in-out infinite; }
+    .blob:nth-child(2) { animation-duration: 20s; }
+    .blob:nth-child(3) { animation-duration: 24s; }
+    @keyframes float { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(26px,-20px) scale(1.08)} }
+    .slide::before { content:''; position:absolute; inset:0; z-index:1; background: radial-gradient(ellipse at center, transparent 56%, var(--color-vignette) 100%); }
+    .panel { background: rgba(255,255,255,.82); border: 1px solid rgba(17,50,77,.10); border-radius: 24px; box-shadow: 0 18px 40px rgba(17,50,77,.08); }
+    .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .78rem; color:#5f7890; font-weight:700; }
+    .title { font-family: var(--font-display); font-weight:700; color:#11324d; line-height:1.05; }
+    .metric { font-size: clamp(2rem, 3.6vw, 3.2rem); font-weight: 800; color:#0f5b8d; line-height:1; }
+    .badge { display:inline-flex; align-items:center; gap:.45rem; background: rgba(15,91,141,.08); color:#0f5b8d; border:1px solid rgba(15,91,141,.12); border-radius:999px; padding:.45rem .8rem; font-size:.84rem; font-weight:700; }
+    .timeline-step { position:relative; padding-left:1.4rem; }
+    .timeline-step::before { content:''; position:absolute; left:0; top:.45rem; width:10px; height:10px; border-radius:999px; background:#0fa3b1; box-shadow:0 0 0 6px rgba(15,163,177,.14); }
+    .timeline-step::after { content:''; position:absolute; left:4px; top:1rem; bottom:-1.2rem; width:2px; background: rgba(15,91,141,.18); }
+    .timeline-step:last-child::after { display:none; }
+    .icon-box { width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background: rgba(15,91,141,.08); color:#0f5b8d; font-weight:800; }
+    .bar-track { height:14px; background: rgba(15,91,141,.10); border-radius:999px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:999px; background: linear-gradient(90deg, #0f5b8d, #0fa3b1); width:0; }
+    .pill-list li { margin-bottom:.65rem; }
+    .mini { font-size:.94rem; color:#34526d; line-height:1.45; }
+    .tight li { margin-bottom:.48rem; }
+    .logo-mark { width:84px; height:84px; margin:0 auto 1rem; }
+  </style>
+</head>
+<body>
+<div class="deck">
+  <section class="slide active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:380px;height:380px;top:-60px;right:-60px;background:#0fa3b1;opacity:.14"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-60px;left:-40px;background:#0f5b8d;opacity:.12"></div>
+      <div class="blob" style="width:220px;height:220px;top:42%;left:12%;background:#e58c2f;opacity:.10"></div>
+    </div>
+    <div class="content text-center">
+      <svg class="logo-mark reveal" viewBox="0 0 100 100" fill="none" aria-label="ORT innovation mark">
+        <rect x="8" y="8" width="84" height="84" rx="22" fill="rgba(15,91,141,0.08)" stroke="rgba(15,91,141,0.18)"/>
+        <circle cx="34" cy="34" r="8" fill="#0f5b8d"/>
+        <circle cx="66" cy="34" r="8" fill="#0fa3b1"/>
+        <circle cx="50" cy="66" r="8" fill="#e58c2f"/>
+        <path d="M34 34 L66 34 L50 66 Z" stroke="#11324d" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <div class="badge reveal" style="margin:0 auto 1rem;">World ORT Network · Ethical AI · Challenge-Based Learning</div>
+      <h1 class="title reveal text-[clamp(2.5rem,5.3vw,4.8rem)]">Empowering the Next Generation of Global Innovators</h1>
+      <p class="reveal text-[clamp(1rem,1.7vw,1.28rem)] text-text-secondary mt-4 max-w-[850px] mx-auto">A board-ready framework for scalable AI + CBL implementation across World ORT schools, designed around educational rigor, governance, and local adaptability.</p>
+      <p class="eyebrow reveal mt-6">Prepared for World ORT leaders and school directors</p>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="2">
+    <div class="gradient-mesh"><div class="blob" style="width:300px;height:300px;top:-70px;right:-30px;background:#0fa3b1;opacity:.10"></div><div class="blob" style="width:220px;height:220px;bottom:-40px;left:-20px;background:#e58c2f;opacity:.08"></div></div>
+    <div class="content grid grid-cols-2 gap-8 items-center">
+      <div class="reveal">
+        <div class="eyebrow mb-3">Why this matters</div>
+        <h2 class="title text-[clamp(2rem,4vw,3.4rem)]">Education for life, now updated for the AI era</h2>
+        <p class="mini mt-5">World ORT's historic mission is not just digital access; it is preparing students to act with competence, responsibility, and purpose in modern society.</p>
+        <ul class="pill-list tight mini mt-5 list-disc pl-5">
+          <li>The educational challenge is moving students from superficial AI use to disciplined inquiry, authorship, and ethical judgment.</li>
+          <li>The strategic opportunity is to make World ORT visibly synonymous with responsible AI practice in STEM and applied learning.</li>
+          <li>The proposal combines CBL, teacher facilitation, and safeguarded AI workflows into one repeatable implementation model.</li>
+        </ul>
+      </div>
+      <div class="panel p-8 reveal">
+        <div class="grid grid-cols-2 gap-5">
+          <div>
+            <div class="icon-box">M</div>
+            <h3 class="font-bold text-lg mt-3">Mission continuity</h3>
+            <p class="mini mt-2">The deck explicitly ties innovation to values, social impact, and student dignity rather than novelty.</p>
+          </div>
+          <div>
+            <div class="icon-box">E</div>
+            <h3 class="font-bold text-lg mt-3">Ethics by design</h3>
+            <p class="mini mt-2">Bias, hallucination, attribution, and data use are built into each learning challenge.</p>
+          </div>
+          <div>
+            <div class="icon-box">L</div>
+            <h3 class="font-bold text-lg mt-3">Local relevance</h3>
+            <p class="mini mt-2">Schools choose contextualized challenges aligned to local community needs and institutional priorities.</p>
+          </div>
+          <div>
+            <div class="icon-box">S</div>
+            <h3 class="font-bold text-lg mt-3">Scalable structure</h3>
+            <p class="mini mt-2">Common governance, shared content standards, and light technical requirements reduce rollout friction.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="3">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:8%;right:10%;background:#0f5b8d;opacity:.09"></div><div class="blob" style="width:250px;height:250px;bottom:-60px;left:-30px;background:#0fa3b1;opacity:.08"></div></div>
+    <div class="content">
+      <div class="eyebrow reveal mb-3">Strategic opportunity</div>
+      <h2 class="title reveal text-[clamp(2rem,4vw,3.3rem)] max-w-[900px]">From AI shortcuts to AI leadership</h2>
+      <div class="grid grid-cols-3 gap-6 mt-8">
+        <div class="panel p-7 reveal">
+          <div class="badge">Current risk</div>
+          <h3 class="font-bold text-xl mt-4">Passive dependence</h3>
+          <p class="mini mt-3">Students increasingly encounter AI as a shortcut tool for answers, not as a structured environment for questioning and reasoning.</p>
+        </div>
+        <div class="panel p-7 reveal">
+          <div class="badge">Desired shift</div>
+          <h3 class="font-bold text-xl mt-4">Cognitive partnership</h3>
+          <p class="mini mt-3">Students use AI to compare evidence, test assumptions, improve drafts, and document decision-making.</p>
+        </div>
+        <div class="panel p-7 reveal">
+          <div class="badge">Institutional result</div>
+          <h3 class="font-bold text-xl mt-4">Network distinction</h3>
+          <p class="mini mt-3">World ORT becomes known not for allowing AI, but for teaching students how to govern and apply it responsibly.</p>
+        </div>
+      </div>
+      <div class="panel p-6 mt-7 reveal">
+        <div class="grid grid-cols-[1.1fr_.9fr] gap-8 items-center">
+          <div>
+            <h3 class="font-bold text-xl">Why directors will care</h3>
+            <p class="mini mt-2">This framing speaks to school quality, student outcomes, reputation, and safeguarding. It avoids childish visual metaphors and treats the audience like institutional decision-makers.</p>
+          </div>
+          <div>
+            <div class="bar-track mb-3"><div class="bar-fill" data-width="82"></div></div>
+            <div class="flex justify-between mini"><span>Academic rigor</span><span>High emphasis</span></div>
+            <div class="bar-track my-3"><div class="bar-fill" data-width="88"></div></div>
+            <div class="flex justify-between mini"><span>Ethical governance</span><span>Highest emphasis</span></div>
+            <div class="bar-track mt-3 mb-3"><div class="bar-fill" data-width="76"></div></div>
+            <div class="flex justify-between mini"><span>Innovation visibility</span><span>Board priority</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="4">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:-20px;right:-40px;background:#e58c2f;opacity:.08"></div><div class="blob" style="width:220px;height:220px;bottom:-30px;left:10%;background:#0fa3b1;opacity:.09"></div></div>
+    <div class="content">
+      <div class="eyebrow reveal mb-3">Pedagogical architecture</div>
+      <h2 class="title reveal text-[clamp(2rem,4vw,3.2rem)]">The CBL loop, adapted for safeguarded AI facilitation</h2>
+      <p class="mini reveal mt-4 max-w-[930px]">This version should explicitly credit Challenge-Based Learning as an established educational approach and position the platform as an implementation layer, not as the inventor of the method.</p>
+      <div class="grid grid-cols-3 gap-6 mt-8">
+        <div class="panel p-7 reveal"><div class="badge">Engage</div><h3 class="font-bold text-xl mt-4">Frame the big idea</h3><p class="mini mt-3">Students identify a real issue linked to sustainability, ethics, community, or innovation and define a challenge worth solving.</p></div>
+        <div class="panel p-7 reveal"><div class="badge">Investigate</div><h3 class="font-bold text-xl mt-4">Research with guardrails</h3><p class="mini mt-3">AI functions as a Socratic tutor, research assistant, and critique partner while teachers retain oversight of evidence quality and reasoning.</p></div>
+        <div class="panel p-7 reveal"><div class="badge">Act</div><h3 class="font-bold text-xl mt-4">Create public-facing work</h3><p class="mini mt-3">Students produce code, media, prototypes, or community interventions that demonstrate transfer, judgment, and social relevance.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="5">
+    <div class="gradient-mesh"><div class="blob" style="width:270px;height:270px;top:0;right:8%;background:#0f5b8d;opacity:.08"></div><div class="blob" style="width:220px;height:220px;bottom:-50px;left:-40px;background:#0fa3b1;opacity:.08"></div></div>
+    <div class="content grid grid-cols-[1.1fr_.9fr] gap-8 items-start">
+      <div>
+        <div class="eyebrow reveal mb-3">Platform design</div>
+        <h2 class="title reveal text-[clamp(2rem,4vw,3.2rem)]">The ORT-CBL engine, now framed around trust</h2>
+        <div class="grid grid-cols-1 gap-5 mt-7">
+          <div class="panel p-6 reveal"><h3 class="font-bold text-xl">Secure AI gateway</h3><p class="mini mt-2">Age-appropriate access to approved text, image, and audio models through one managed environment, with logging, permissions, and school-level controls.</p></div>
+          <div class="panel p-6 reveal"><h3 class="font-bold text-xl">Curated challenge library</h3><p class="mini mt-2">Ready-to-run challenges linked to SDGs, entrepreneurship, design, community needs, and STEM themes, with teacher notes and rubrics.</p></div>
+          <div class="panel p-6 reveal"><h3 class="font-bold text-xl">Smart scaffolding</h3><p class="mini mt-2">Structured prompts, progress checkpoints, and formative feedback support inquiry without replacing human evaluation.</p></div>
+        </div>
+      </div>
+      <div class="panel p-7 reveal">
+        <div class="eyebrow mb-3">Governance requirements</div>
+        <ul class="mini tight list-disc pl-5">
+          <li>Child data protection and consent workflows</li>
+          <li>Role-based permissions for students, teachers, and leaders</li>
+          <li>Content moderation and audit logging</li>
+          <li>Regional policy alignment, including GDPR-style expectations</li>
+          <li>Clear model review and approval process</li>
+        </ul>
+        <div class="mt-6 pt-5 border-t border-[rgba(17,50,77,.12)]">
+          <div class="metric" data-count="5">0</div>
+          <p class="mini mt-2">Core trust layers that should appear explicitly in the board presentation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="6">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:-40px;right:-20px;background:#0fa3b1;opacity:.1"></div><div class="blob" style="width:220px;height:220px;bottom:-50px;left:6%;background:#e58c2f;opacity:.08"></div></div>
+    <div class="content">
+      <div class="eyebrow reveal mb-3">Scalability with realism</div>
+      <h2 class="title reveal text-[clamp(2rem,4vw,3.2rem)]">Designed for global reach and infrastructure asymmetry</h2>
+      <div class="grid grid-cols-3 gap-6 mt-8">
+        <div class="panel p-7 reveal"><h3 class="font-bold text-xl">Browser-first delivery</h3><p class="mini mt-3">The program should run in standard web environments so schools do not need advanced local installations to participate.</p></div>
+        <div class="panel p-7 reveal"><h3 class="font-bold text-xl">Multilingual support</h3><p class="mini mt-3">English, Spanish, Portuguese, and Hebrew should be first-wave interfaces, with content localization built into the challenge workflow.</p></div>
+        <div class="panel p-7 reveal"><h3 class="font-bold text-xl">Local challenge selection</h3><p class="mini mt-3">Schools choose from globally shared templates and then adapt examples, evidence sources, and outputs to their own context.</p></div>
+      </div>
+      <div class="panel p-6 mt-7 reveal">
+        <h3 class="font-bold text-xl">Important fix in the narrative</h3>
+        <p class="mini mt-2">Do not present inequality in infrastructure as already solved. Present it as a known implementation challenge with a practical mitigation strategy: lightweight delivery, phased adoption, and prioritized support for lower-resource contexts.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="7">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:5%;right:8%;background:#0f5b8d;opacity:.09"></div><div class="blob" style="width:220px;height:220px;bottom:-40px;left:-20px;background:#0fa3b1;opacity:.08"></div></div>
+    <div class="content grid grid-cols-[.95fr_1.05fr] gap-8 items-start">
+      <div>
+        <div class="eyebrow reveal mb-3">Teacher enablement</div>
+        <h2 class="title reveal text-[clamp(2rem,4vw,3.2rem)]">Empower the teacher, standardize the essentials</h2>
+        <div class="panel p-7 mt-6 reveal">
+          <ul class="mini tight list-disc pl-5">
+            <li>Teacher-facing facilitation guides reduce tool confusion.</li>
+            <li>Common rubrics protect quality across schools.</li>
+            <li>Dashboards help leaders see engagement, completion, and support needs.</li>
+            <li>Knowledge stays in the platform, reducing dependency on one champion teacher.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-5">
+        <div class="panel p-6 reveal"><div class="metric" data-count="3">0</div><p class="mini mt-2">Teacher support layers: onboarding, facilitation notes, and just-in-time troubleshooting.</p></div>
+        <div class="panel p-6 reveal"><div class="metric" data-count="1">0</div><p class="mini mt-2">Non-negotiable message: teachers remain the pedagogical authority.</p></div>
+        <div class="panel p-6 reveal"><div class="metric" data-count="0">0</div><p class="mini mt-2">Claims that teachers can be replaced should appear nowhere in the final deck.</p></div>
+        <div class="panel p-6 reveal"><div class="metric" data-count="100">0</div><p class="mini mt-2">Percent emphasis on human oversight in any school-facing implementation document.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="8">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:-20px;right:6%;background:#e58c2f;opacity:.08"></div><div class="blob" style="width:240px;height:240px;bottom:-60px;left:5%;background:#0fa3b1;opacity:.08"></div></div>
+    <div class="content">
+      <div class="eyebrow reveal mb-3">Strategic alignment</div>
+      <h2 class="title reveal text-[clamp(2rem,4vw,3.2rem)]">Innovation guided by integrity, citizenship, and network fit</h2>
+      <div class="grid grid-cols-2 gap-6 mt-8">
+        <div class="panel p-7 reveal">
+          <h3 class="font-bold text-xl">Values alignment</h3>
+          <ul class="mini tight list-disc pl-5 mt-3">
+            <li>Every challenge includes an ethics lens: bias, hallucination, attribution, and responsible data use.</li>
+            <li>Projects connect innovation to social contribution, community relevance, and global citizenship.</li>
+            <li>The presentation language should explicitly reflect World ORT's values-based educational identity.</li>
+          </ul>
+        </div>
+        <div class="panel p-7 reveal">
+          <h3 class="font-bold text-xl">Program alignment</h3>
+          <ul class="mini tight list-disc pl-5 mt-3">
+            <li>Designed to complement digital skills, STEM initiatives, and summer innovation programs.</li>
+            <li>Can operate as a pilot strand before becoming a broader network capability.</li>
+            <li>Works best when framed as capacity building, not as a standalone software sale.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="9">
+    <div class="gradient-mesh"><div class="blob" style="width:260px;height:260px;top:-20px;right:-30px;background:#0f5b8d;opacity:.10"></div><div class="blob" style="width:220px;height:220px;bottom:-50px;left:-20px;background:#0fa3b1;opacity:.08"></div></div>
+    <div class="content grid grid-cols-[.95fr_1.05fr] gap-8 items-start">
+      <div class="reveal">
+        <div class="eyebrow mb-3">Roadmap</div>
+        <h2 class="title text-[clamp(2rem,4vw,3.2rem)]">The first 180 days, rewritten for board realism</h2>
+        <p class="mini mt-4">The rollout should be framed as a governed pilot sequence, not as an instant global subscription launch.</p>
+      </div>
+      <div class="panel p-8 reveal">
+        <div class="timeline-step mb-8"><div class="badge">0–60 days</div><h3 class="font-bold text-xl mt-3">Pilot design and partner confirmation</h3><p class="mini mt-2">Select 3 schools, agree governance expectations, finalize challenges, and establish success measures.</p></div>
+        <div class="timeline-step mb-8"><div class="badge">61–120 days</div><h3 class="font-bold text-xl mt-3">Teacher onboarding and supervised launch</h3><p class="mini mt-2">Train facilitators, run first challenge cycles, and document implementation friction in real settings.</p></div>
+        <div class="timeline-step"><div class="badge">121–180 days</div><h3 class="font-bold text-xl mt-3">Evaluation and expansion decision</h3><p class="mini mt-2">Review outcomes, governance performance, and school feedback before authorizing broader network adoption.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-slide="10">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-70px;right:-50px;background:#0fa3b1;opacity:.14"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-60px;left:-30px;background:#0f5b8d;opacity:.12"></div>
+      <div class="blob" style="width:220px;height:220px;top:45%;left:14%;background:#e58c2f;opacity:.10"></div>
+    </div>
+    <div class="content text-center">
+      <div class="eyebrow reveal mb-4">Board decision</div>
+      <h2 class="title reveal text-[clamp(2.3rem,5vw,4.2rem)] max-w-[920px] mx-auto">A stronger closing ask: approve a governed pilot, not just a conversation</h2>
+      <div class="grid grid-cols-3 gap-6 mt-10">
+        <div class="panel p-6 reveal"><h3 class="font-bold text-lg">Decision requested</h3><p class="mini mt-2">Authorize a 3-school pilot framework and designate executive sponsors.</p></div>
+        <div class="panel p-6 reveal"><h3 class="font-bold text-lg">Expected output</h3><p class="mini mt-2">Pilot evidence on learning quality, teacher viability, and AI governance readiness.</p></div>
+        <div class="panel p-6 reveal"><h3 class="font-bold text-lg">Partnership posture</h3><p class="mini mt-2">Present this as shared educational infrastructure-building for the network.</p></div>
+      </div>
+      <p class="reveal text-lg text-text-secondary mt-8 max-w-[850px] mx-auto">This final version is much more likely to resonate with World ORT leaders because it emphasizes institutional stewardship, educational quality, and controlled implementation instead of startup-style hype.</p>
+    </div>
+  </section>
+</div>
+<div class="nav-controls">
+  <button class="nav-btn" onclick="changeSlide(-1)" aria-label="Previous slide">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)" aria-label="Next slide">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 10</span>
+</div>
+<script>
+let current = 1;
+const total = document.querySelectorAll('.slide').length;
+const dotsContainer = document.getElementById('dots');
+const counter = document.getElementById('counter');
+for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+function goToSlide(n) {
+  const prev = document.querySelector('.slide.active');
+  const next = document.querySelector(`.slide[data-slide="${n}"]`);
+  if (prev) prev.classList.remove('active');
+  if (next) { next.classList.add('active'); animateSlide(next); }
+  current = n; updateNav();
+}
+function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === current)); counter.textContent = current + ' / ' + total; }
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+let touchStartX = 0; document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }); document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+function animateSlide(slide) {
+  slide.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transition = 'none'; el.style.opacity = '0'; el.style.transform = 'translateY(18px)'; el.offsetHeight;
+    const delay = i * 0.08;
+    el.style.transition = `opacity .35s ease ${delay}s, transform .35s ease ${delay}s`;
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+  });
+  slide.querySelectorAll('.bar-fill').forEach((bar, i) => {
+    bar.style.transition = 'none'; bar.style.width = '0%'; bar.offsetHeight;
+    bar.style.transition = `width .6s ease ${i * 0.08}s`; bar.style.width = bar.dataset.width + '%';
+  });
+  slide.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count || '0', 10); let cur = 0; const step = Math.max(1, Math.ceil(target / 32));
+    clearInterval(el._timer);
+    el.textContent = '0';
+    el._timer = setInterval(() => { cur += step; if (cur >= target) { cur = target; clearInterval(el._timer); } el.textContent = cur.toLocaleString(); }, 28);
+  });
+}
+try { animateSlide(document.querySelector('.slide.active')); } catch(e) {}
+</script>
+</body>
+</html>
